@@ -5,15 +5,14 @@ const Message = require('../../../models/Message');
 
 module.exports = async (_, { id: userID }, context) => {
 	try {
-		// console.log(otherUser);
 		const { id, username } = checkAuth(context);
 		const errors = {};
 		if (userID.trim() == '') {
-			errors.userId = 'Unique userId of user must be provided to add them to your contact !';
+			errors.userId = 'Unique userId of user must be provided to delete them from your contact !';
 			throw errors;
 		}
 		else if (id == userID) {
-			errors.userId = 'You cannot add yourself in your contacts !';
+			errors.userId = 'You cannot delete yourself from your contacts !';
 			throw errors;
 		}
 		const otherUser = await User.findOne({ _id: userID });
@@ -22,26 +21,28 @@ module.exports = async (_, { id: userID }, context) => {
 			throw errors;
 		}
 		const user = await User.findOne({ username });
-		if (user.contacts.find((u) => u == otherUser.username)) {
-			errors.userId = 'This user is already in your contacts !';
+		if (!user.contacts.find((u) => u == otherUser.username)) {
+			errors.userId = 'This user is not present in your contacts !';
 			throw errors;
 		}
-		user.contacts = [
-			otherUser.username,
-			...user.contacts
-		];
-		otherUser.contacts = [
-			username,
-			...otherUser.contacts
-		];
+		user.contacts = user.contacts.filter((u) => u != otherUser.username);
+		otherUser.contacts = otherUser.contacts.filter((u) => u != username);
+		await Message.deleteMany({
+			from : {
+				$in : [
+					otherUser.username,
+					username
+				]
+			},
+			to   : {
+				$in : [
+					otherUser.username,
+					username
+				]
+			}
+		});
 		await otherUser.save();
 		await user.save();
-		await Message.create({
-			to      : otherUser.username,
-			from    : 'server',
-			content : `${username} has added you to their contacts !`,
-			type    : 'personal'
-		});
 		return [
 			...user.contacts
 		];

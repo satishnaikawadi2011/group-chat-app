@@ -7,7 +7,7 @@ module.exports = async (_, { name }, context) => {
 	try {
 		const { id, username } = checkAuth(context);
 		const errors = {};
-		if (name.trim() === '') {
+		if (name.trim() == '') {
 			errors.name = 'Group Name must not be empty !';
 			throw errors;
 		}
@@ -20,7 +20,10 @@ module.exports = async (_, { name }, context) => {
 
 		const group = await Group.create({
 			name,
-			admin : username
+			admin   : username,
+			members : [
+				id
+			]
 		});
 		const user = await User.findOne({ username });
 		user.groups = [

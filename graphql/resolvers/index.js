@@ -2,8 +2,9 @@ const userResolver = require('./user');
 const messageResolver = require('./message');
 const groupResolvers = require('./group');
 const User = require('../../models/User');
+const Message = require('../../models/Message');
 
-// User resolver for Group resolver
+//TODO: User resolver for Group resolver
 const userInGroup = async (parent) => {
 	// console.log('Members', parent);
 	const user = await User.find({ _id: { $in: parent.members } }).select([
@@ -19,6 +20,19 @@ const userInGroup = async (parent) => {
 	return transformedUsers;
 };
 
+// TODO: get messages in particular group
+const getGroupMessages = async (parent) => {
+	// console.log('ots called');
+	const messages = await Message.find({ type: 'group', to: parent.name }).sort({ createdAt: -1 });
+	const transformedMessages = messages.map((m) => {
+		return {
+			...m._doc,
+			id : m._id
+		};
+	});
+	return transformedMessages;
+};
+
 module.exports = {
 	User     : {
 		createdAt : (parent) => parent.createdAt.toISOString()
@@ -28,7 +42,8 @@ module.exports = {
 	},
 	Group    : {
 		createdAt : (parent) => parent.createdAt.toISOString(),
-		members   : userInGroup
+		members   : userInGroup,
+		Messages  : getGroupMessages
 	},
 	Query    : {
 		...userResolver.Query,
