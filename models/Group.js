@@ -12,7 +12,7 @@ const GroupSchema = new Schema(
 			required : true
 		},
 		members : [
-			{ type: mongoose.Schema.Types.ObjectId, ref: 'user' }
+			{ username: String, createdAt: String }
 		]
 	},
 	{ timestamps: true }

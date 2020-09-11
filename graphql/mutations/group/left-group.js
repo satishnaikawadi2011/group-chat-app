@@ -18,16 +18,16 @@ module.exports = async (_, { groupName }, context) => {
 		if (group.admin == username) {
 			errors.username = 'You cannot left the group as you are admin , instead remove others or delete the group.';
 		}
-		const isMember = group.members.find((member) => member == id);
+		const isMember = group.members.find((member) => member.username == username);
 		if (!isMember) {
 			errors.userId = 'You are not a member of this group !';
 			throw errors;
 		}
 		const user = await User.findOne({ username });
-		const filteredGroups = user.groups.filter((gid) => gid != group._id.toString());
+		const filteredGroups = user.groups.filter((gname) => gname != group.name);
 		user.groups = filteredGroups;
 		await user.save();
-		group.members = group.members.filter((m) => m != id);
+		group.members = group.members.filter((m) => m.username != username);
 		await group.save();
 		await Message.create({
 			from    : 'server',

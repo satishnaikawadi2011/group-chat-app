@@ -17,15 +17,15 @@ module.exports = async (_, { id: groupId }, context) => {
 			throw new UserInputError('You are not allowed to delete this group !');
 		}
 		const members = await User.find({
-			_id : {
+			username : {
 				$in : [
-					...group.members,
-					id
+					...group.members.map((m) => m.username),
+					username
 				]
 			}
 		});
 		members.forEach((m) => {
-			m.groups = m.groups.filter((gid) => gid != groupId);
+			m.groups = m.groups.filter((gname) => gname != group.name);
 			m.save();
 		});
 

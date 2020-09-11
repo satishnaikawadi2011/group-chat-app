@@ -8,6 +8,11 @@ module.exports = async (_, { userId, groupName }, context) => {
 	try {
 		const { id, username } = checkAuth(context);
 		const errors = {};
+		const otherUser = await User.findOne({ _id: userId });
+		if (!otherUser) {
+			errors.userId = 'User with this this userId not found !';
+			throw errors;
+		}
 		const group = await Group.findOne({ name: groupName });
 		if (!group) {
 			errors.groupName = 'No group with this name found !';
@@ -16,8 +21,7 @@ module.exports = async (_, { userId, groupName }, context) => {
 		if (group.admin != username) {
 			throw new UserInputError('You are not allowed to add members to this group !');
 		}
-		// console.log(group.members);
-		if (group.members.find((member) => member == userId)) {
+		if (group.members.find((member) => member.username == otherUser.username)) {
 			errors.userId = 'This user is already a member of this group !';
 			throw errors;
 		}
@@ -29,19 +33,17 @@ module.exports = async (_, { userId, groupName }, context) => {
 			errors.userId = " You are already admin of group , so don't add yourself ! ";
 			throw errors;
 		}
-		const otherUser = await User.findOne({ _id: userId });
-		if (!otherUser) {
-			errors.userId = 'User with this this userId not found !';
-			throw errors;
-		}
 		otherUser.groups = [
-			group._id,
+			group.name,
 			...otherUser.groups
 		];
 		await otherUser.save();
 		group.members = [
 			...group.members,
-			userId
+			{
+				username  : otherUser.username,
+				createdAt : new Date().toISOString()
+			}
 		];
 		await group.save();
 		await Message.create({
@@ -50,8 +52,13 @@ module.exports = async (_, { userId, groupName }, context) => {
 			type    : 'group',
 			content : `Admin has added ${otherUser.username} to group.`
 		});
-		const group2 = await Group.findOne({ name: groupName }).populate('members');
-		return group2.members;
+		const members = await User.find({ username: { $in: group.members.map((m) => m.username) } });
+		return members.map((m) => {
+			return {
+				id : m._id,
+				...m._doc
+			};
+		});
 	} catch (err) {
 		console.log(err);
 		if (err.kind == 'ObjectId') {

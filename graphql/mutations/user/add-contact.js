@@ -5,7 +5,6 @@ const Message = require('../../../models/Message');
 
 module.exports = async (_, { id: userID }, context) => {
 	try {
-		// console.log(otherUser);
 		const { id, username } = checkAuth(context);
 		const errors = {};
 		if (userID.trim() == '') {

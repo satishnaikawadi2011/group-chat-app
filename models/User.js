@@ -19,7 +19,7 @@ const UserSchema = new Schema(
 			required  : true
 		},
 		groups   : [
-			{ type: mongoose.Schema.Types.ObjectId, ref: 'group' }
+			{ type: String }
 		],
 		contacts : [
 			{

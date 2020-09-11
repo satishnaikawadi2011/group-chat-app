@@ -7,25 +7,17 @@ const { UserInputError } = require('apollo-server');
 module.exports = async (_, { to, content }, context) => {
 	try {
 		const { username, id } = checkAuth(context);
-		// console.log(username);
 		const errors = {};
 		let type;
-		const user = await User.findOne({ username }).populate('groups');
-		// const recepient = await User.findOne({ username: to });
-		// const group = await Group.findOne({ name: to });
-		// if (!recepient && !group) {
-		// 	errors.to = 'No groups or user found with this name !';
-		// 	throw errors;
-		// }
+		const user = await User.findOne({ username });
 		if (to == user.username) {
 			errors.to = 'You cannot send message to yourself !';
 			throw errors;
 		}
-		// console.log(user.contacts);
 		if (user.contacts.find((u) => u == to)) {
 			type = 'personal';
 		}
-		else if (user.groups.find((g) => g.name == to)) {
+		else if (user.groups.find((gname) => gname == to)) {
 			type = 'group';
 		}
 		else {

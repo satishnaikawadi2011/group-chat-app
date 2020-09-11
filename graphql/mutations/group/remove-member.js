@@ -11,7 +11,6 @@ module.exports = async (_, { userId, groupName }, context) => {
 		const errors = {};
 		const group = await Group.findOne({ name: groupName });
 		const otherUser = await User.findOne({ _id: userId });
-		// console.log(otherUser.username);
 		if (!group) {
 			errors.groupName = 'No group with this name found !';
 			throw errors;
@@ -19,9 +18,7 @@ module.exports = async (_, { userId, groupName }, context) => {
 		if (group.admin != username) {
 			throw new UserInputError('You are not allowed to remove members from this group !');
 		}
-		// console.log(group.members[0] == userId);
-		const isMember = group.members.find((member) => member == userId);
-		// console.log(isMember);
+		const isMember = group.members.find((member) => member.username == otherUser.username);
 		if (!isMember) {
 			errors.userId = 'This user is not a member of this group !';
 			throw errors;
@@ -38,10 +35,10 @@ module.exports = async (_, { userId, groupName }, context) => {
 			errors.userId = 'User with this this userId not found !';
 			throw errors;
 		}
-		const filteredGroups = otherUser.groups.filter((gid) => gid != group._id.toString());
+		const filteredGroups = otherUser.groups.filter((gname) => gname != group.name);
 		otherUser.groups = filteredGroups;
 		await otherUser.save();
-		group.members = group.members.filter((m) => m != userId);
+		group.members = group.members.filter((m) => m.username != otherUser.username);
 		await group.save();
 		await Message.create({
 			from    : 'server',
@@ -49,8 +46,13 @@ module.exports = async (_, { userId, groupName }, context) => {
 			type    : 'group',
 			content : `Admin has removed ${otherUser.username} from group.`
 		});
-		const group2 = await Group.findOne({ name: groupName }).populate('members');
-		return group2.members;
+		const members = await User.find({ username: { $in: group.members.map((m) => m.username) } });
+		return members.map((m) => {
+			return {
+				id : m._id,
+				...m._doc
+			};
+		});
 	} catch (err) {
 		console.log(err);
 		if (err.kind == 'ObjectId') {

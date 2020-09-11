@@ -3,6 +3,7 @@ const User = require('../../../models/User');
 const Message = require('../../../models/Message');
 const { ForbiddenError, UserInputError } = require('apollo-server');
 const Group = require('../../../models/Group');
+const group = require('../../resolvers/group');
 
 module.exports = async (_, { otherUser, type }, context) => {
 	try {
@@ -34,7 +35,7 @@ module.exports = async (_, { otherUser, type }, context) => {
 			}).sort({ createdAt: -1 });
 		}
 		else {
-			const group = await Group.findOne({ name: otherUser }).populate('members', 'username');
+			const group = await Group.findOne({ name: otherUser });
 			if (!group) {
 				throw new ForbiddenError('No group found with this username !');
 			}
@@ -72,7 +73,15 @@ module.exports = async (_, { otherUser, type }, context) => {
 			});
 		}
 		else {
-			return transformedMessages;
+			const group2 = await Group.findOne({ name: otherUser });
+			const member = group2.members.find((m) => m.username == username);
+			// console.log();
+			return transformedMessages.filter((m) => {
+				if (new Date(m.createdAt).getTime() > new Date(member.createdAt).getTime()) {
+					return true;
+				}
+				return false;
+			});
 		}
 	} catch (err) {
 		console.log(err);

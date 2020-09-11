@@ -22,12 +22,12 @@ module.exports = async (_, { name }, context) => {
 			name,
 			admin   : username,
 			members : [
-				id
+				{ username, createdAt: new Date().toISOString() }
 			]
 		});
 		const user = await User.findOne({ username });
 		user.groups = [
-			group._id,
+			group.name,
 			...user.groups
 		];
 		user.save();
