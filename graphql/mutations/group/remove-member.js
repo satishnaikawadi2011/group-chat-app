@@ -11,6 +11,10 @@ module.exports = async (_, { userId, groupName }, context) => {
 		const errors = {};
 		const group = await Group.findOne({ name: groupName });
 		const otherUser = await User.findOne({ _id: userId });
+		if (!otherUser) {
+			errors.userId = 'User with this this userId not found !';
+			throw errors;
+		}
 		if (!group) {
 			errors.groupName = 'No group with this name found !';
 			throw errors;
@@ -29,10 +33,6 @@ module.exports = async (_, { userId, groupName }, context) => {
 		}
 		else if (id == userId) {
 			errors.userId = " You are a admin of group , so don't remove yourself !";
-			throw errors;
-		}
-		if (!otherUser) {
-			errors.userId = 'User with this this userId not found !';
 			throw errors;
 		}
 		const filteredGroups = otherUser.groups.filter((gname) => gname != group.name);

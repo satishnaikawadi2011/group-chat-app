@@ -26,7 +26,6 @@ module.exports = gql`
 		admin: String!
 		createdAt: String
 		members: [User]
-		Messages: [Message]!
 	}
 
 	type Query {

@@ -39,23 +39,6 @@ const userInGroup = async (parent) => {
 	}
 };
 
-// TODO: get messages in particular group
-const getGroupMessages = async (parent) => {
-	// console.log('ots called');
-	try {
-		const messages = await Message.find({ type: 'group', to: parent.name }).sort({ createdAt: -1 });
-		const transformedMessages = messages.map((m) => {
-			return {
-				...m._doc,
-				id : m._id
-			};
-		});
-		return transformedMessages;
-	} catch (error) {
-		console.log(error);
-	}
-};
-
 module.exports = {
 	User     : {
 		createdAt : (parent) => parent.createdAt.toISOString(),
@@ -66,8 +49,7 @@ module.exports = {
 	},
 	Group    : {
 		createdAt : (parent) => parent.createdAt.toISOString(),
-		members   : userInGroup,
-		Messages  : getGroupMessages
+		members   : userInGroup
 	},
 	Query    : {
 		...userResolver.Query,
