@@ -46,4 +46,8 @@ module.exports = gql`
 		removeMember(userId: String!, groupName: String!): [User]!
 		leftGroup(groupName: String!): String!
 	}
+
+	type Subscription {
+		newMessage: Message!
+	}
 `;

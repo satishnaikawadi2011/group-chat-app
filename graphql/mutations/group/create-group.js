@@ -36,7 +36,7 @@ module.exports = async (_, { name }, context) => {
 			...group._doc
 		};
 	} catch (err) {
-		console.log(err);
+		console.log(Object.values(err));
 		throw new UserInputError('Bad Input !', { errors: err });
 	}
 };

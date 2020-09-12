@@ -40,25 +40,28 @@ const userInGroup = async (parent) => {
 };
 
 module.exports = {
-	User     : {
+	User         : {
 		createdAt : (parent) => parent.createdAt.toISOString(),
 		groups    : getGroupsInUser
 	},
-	Message  : {
+	Message      : {
 		createdAt : (parent) => parent.createdAt.toISOString()
 	},
-	Group    : {
+	Group        : {
 		createdAt : (parent) => parent.createdAt.toISOString(),
 		members   : userInGroup
 	},
-	Query    : {
+	Query        : {
 		...userResolver.Query,
 		...messageResolver.Query,
 		...groupResolvers.Query
 	},
-	Mutation : {
+	Mutation     : {
 		...userResolver.Mutation,
 		...messageResolver.Mutation,
 		...groupResolvers.Mutation
+	},
+	Subscription : {
+		...messageResolver.Subscription
 	}
 };

@@ -6,6 +6,7 @@ const { UserInputError } = require('apollo-server');
 
 module.exports = async (_, { to, content }, context) => {
 	try {
+		const { pubsub } = context;
 		const { username, id } = checkAuth(context);
 		const errors = {};
 		let type;
@@ -34,6 +35,7 @@ module.exports = async (_, { to, content }, context) => {
 			content,
 			type
 		});
+		pubsub.publish('NEW_MESSAGE', { newMessage: message });
 		return {
 			id : message._id,
 			...message._doc

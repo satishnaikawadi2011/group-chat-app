@@ -8,6 +8,7 @@ const mongoose = require('mongoose');
 module.exports = async (_, { userId, groupName }, context) => {
 	try {
 		const { id, username } = checkAuth(context);
+		const { pubsub } = context;
 		const errors = {};
 		const group = await Group.findOne({ name: groupName });
 		const otherUser = await User.findOne({ _id: userId });
@@ -40,12 +41,13 @@ module.exports = async (_, { userId, groupName }, context) => {
 		await otherUser.save();
 		group.members = group.members.filter((m) => m.username != otherUser.username);
 		await group.save();
-		await Message.create({
+		const message = await Message.create({
 			from    : 'server',
 			to      : group.name,
 			type    : 'group',
 			content : `Admin has removed ${otherUser.username} from group.`
 		});
+		pubsub.publish('NEW_MESSAGE', { newMessage: message });
 		const members = await User.find({ username: { $in: group.members.map((m) => m.username) } });
 		return members.map((m) => {
 			return {

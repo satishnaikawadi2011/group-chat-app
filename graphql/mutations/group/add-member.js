@@ -6,6 +6,7 @@ const Message = require('../../../models/Message');
 
 module.exports = async (_, { userId, groupName }, context) => {
 	try {
+		const { pubsub } = context;
 		const { id, username } = checkAuth(context);
 		const errors = {};
 		const otherUser = await User.findOne({ _id: userId });
@@ -46,12 +47,13 @@ module.exports = async (_, { userId, groupName }, context) => {
 			}
 		];
 		await group.save();
-		await Message.create({
+		const message = await Message.create({
 			from    : 'server',
 			to      : group.name,
 			type    : 'group',
 			content : `Admin has added ${otherUser.username} to group.`
 		});
+		pubsub.publish('NEW_MESSAGE', { newMessage: message });
 		const members = await User.find({ username: { $in: group.members.map((m) => m.username) } });
 		return members.map((m) => {
 			return {

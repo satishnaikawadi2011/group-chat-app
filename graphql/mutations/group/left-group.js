@@ -9,6 +9,7 @@ const { findOne } = require('../../../models/User');
 module.exports = async (_, { groupName }, context) => {
 	try {
 		const { id, username } = checkAuth(context);
+		const { pubsub } = context;
 		const errors = {};
 		const group = await Group.findOne({ name: groupName });
 		if (!group) {
@@ -17,6 +18,7 @@ module.exports = async (_, { groupName }, context) => {
 		}
 		if (group.admin == username) {
 			errors.username = 'You cannot left the group as you are admin , instead remove others or delete the group.';
+			throw errors;
 		}
 		const isMember = group.members.find((member) => member.username == username);
 		if (!isMember) {
@@ -29,12 +31,13 @@ module.exports = async (_, { groupName }, context) => {
 		await user.save();
 		group.members = group.members.filter((m) => m.username != username);
 		await group.save();
-		await Message.create({
+		const message = await Message.create({
 			from    : 'server',
 			to      : group.name,
 			type    : 'group',
 			content : `${username} has left the group.`
 		});
+		pubsub.publish('NEW_MESSAGE', { newMessage: message });
 		return 'You have successfully left the group.';
 	} catch (err) {
 		console.log(err);
