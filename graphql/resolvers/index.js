@@ -4,6 +4,7 @@ const groupResolvers = require('./group');
 const User = require('../../models/User');
 const Message = require('../../models/Message');
 const Group = require('../../models/Group');
+const GraphQLJSON = require('graphql-type-json');
 
 //TODO: Group resolver for User resolver
 const getGroupsInUser = async (parent) => {
@@ -63,5 +64,6 @@ module.exports = {
 	},
 	Subscription : {
 		...messageResolver.Subscription
-	}
+	},
+	JSON         : GraphQLJSON
 };

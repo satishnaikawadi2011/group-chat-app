@@ -1,11 +1,14 @@
 const { gql } = require('apollo-server');
 
 module.exports = gql`
+	scalar JSON
+
 	type User {
 		id: ID
 		username: String!
 		email: String
 		token: String
+		imageUrl: String
 		createdAt: String
 		groups: [Group]!
 		contacts: [String]!
@@ -28,11 +31,19 @@ module.exports = gql`
 		members: [User]
 	}
 
+	type LatestMessage {
+		content: String!
+		from: String!
+		createdAt: String!
+	}
+
 	type Query {
 		getUsersByGroup(name: String!): [User]!
 		getUsers: [User]!
+		getUser: JSON
 		login(username: String!, password: String!): User!
 		getMessages(otherUser: String!, type: String!): [Message]!
+		getLatestMessages: JSON
 	}
 
 	type Mutation {

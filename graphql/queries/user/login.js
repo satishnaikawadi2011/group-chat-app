@@ -25,7 +25,7 @@ module.exports = async (_, args) => {
 			throw errors;
 		}
 
-		const token = generateToken({ id: user._id, username: user.username });
+		const token = generateToken({ id: user._id, ...user._doc });
 		return {
 			id    : user._id,
 			...user._doc,
