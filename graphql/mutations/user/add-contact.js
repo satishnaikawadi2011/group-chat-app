@@ -36,13 +36,15 @@ module.exports = async (_, { id: userID }, context) => {
 		];
 		await otherUser.save();
 		await user.save();
-		pubsub.publish('NEW_CONTACT', { newContact: { username: otherUser.username, name: username } });
-		await Message.create({
-			to      : otherUser.username,
-			from    : 'server',
-			content : `${username} has added you to their contacts !`,
-			type    : 'personal'
+		pubsub.publish('NEW_CONTACT', {
+			newContact : { username: otherUser.username, contactName: username, type: 'personal' }
 		});
+		// await Message.create({
+		// 	to      : otherUser.username,
+		// 	from    : 'server',
+		// 	content : `${username} has added you to their contacts !`,
+		// 	type    : 'personal'
+		// });
 		return [
 			...user.contacts
 		];

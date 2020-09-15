@@ -15,7 +15,7 @@ module.exports = {
 		},
 		async ({ deleteContact }, _, context) => {
 			const { username } = checkAuth(context);
-			if (deleteContact.type === 'personal') {
+			if (deleteContact.type === 'personal' || 'personal2') {
 				if (deleteContact.username === username) {
 					return true;
 				}
