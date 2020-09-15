@@ -4,9 +4,12 @@ const deleteGroup = require('../mutations/group/delete-group');
 const removeMember = require('../mutations/group/remove-member');
 const leftGroup = require('../mutations/group/left-group');
 const newContact = require('../subscriptions/group/new-contact');
+const getGroup = require('../queries/group/get-group');
 
 module.exports = {
-	Query        : {},
+	Query        : {
+		getGroup : getGroup
+	},
 	Mutation     : {
 		createGroup  : createGroup,
 		addMember    : addMember,

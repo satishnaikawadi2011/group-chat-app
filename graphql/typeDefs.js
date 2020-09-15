@@ -38,12 +38,12 @@ module.exports = gql`
 	}
 
 	type Query {
-		getUsersByGroup(name: String!): [User]!
 		getUsers: [User]!
 		getUser: JSON
 		login(username: String!, password: String!): User!
 		getMessages(otherUser: String!, type: String!): [Message]!
 		getLatestMessages: JSON
+		getGroup(name: String!): Group!
 	}
 
 	type Mutation {
