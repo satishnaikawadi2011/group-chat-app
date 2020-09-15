@@ -53,6 +53,7 @@ module.exports = async (_, { userId, groupName }, context) => {
 			type    : 'group',
 			content : `Admin has added ${otherUser.username} to group.`
 		});
+		pubsub.publish('NEW_CONTACT', { newContact: { username: otherUser.username, contactName: group.name } });
 		pubsub.publish('NEW_MESSAGE', { newMessage: message });
 		const members = await User.find({ username: { $in: group.members.map((m) => m.username) } });
 		return members.map((m) => {

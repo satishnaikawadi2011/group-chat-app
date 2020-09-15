@@ -60,5 +60,7 @@ module.exports = gql`
 
 	type Subscription {
 		newMessage: Message!
+		newContact: JSON
+		deleteContact: JSON
 	}
 `;

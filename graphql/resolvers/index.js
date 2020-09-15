@@ -63,7 +63,8 @@ module.exports = {
 		...groupResolvers.Mutation
 	},
 	Subscription : {
-		...messageResolver.Subscription
+		...messageResolver.Subscription,
+		...groupResolvers.Subscription
 	},
 	JSON         : GraphQLJSON
 };

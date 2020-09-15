@@ -5,6 +5,7 @@ const Message = require('../../../models/Message');
 
 module.exports = async (_, { id: userID }, context) => {
 	try {
+		const { pubsub } = context;
 		const { id, username } = checkAuth(context);
 		const errors = {};
 		if (userID.trim() == '') {
@@ -35,6 +36,7 @@ module.exports = async (_, { id: userID }, context) => {
 		];
 		await otherUser.save();
 		await user.save();
+		pubsub.publish('NEW_CONTACT', { newContact: { username: otherUser.username, name: username } });
 		await Message.create({
 			to      : otherUser.username,
 			from    : 'server',

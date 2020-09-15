@@ -6,6 +6,7 @@ const Message = require('../../../models/Message');
 
 module.exports = async (_, { id: groupId }, context) => {
 	try {
+		const { pubsub } = context;
 		const { id, username } = checkAuth(context);
 		const errors = {};
 		const group = await Group.findOne({ _id: groupId });
@@ -30,6 +31,9 @@ module.exports = async (_, { id: groupId }, context) => {
 		});
 
 		await Message.deleteMany({ type: 'group', to: group.name });
+		pubsub.publish('DELETE_CONTACT', {
+			deleteContact: { username: otherUser.username, name: group.name, type: 'group', members: group.members }
+		});
 		await group.delete();
 		return 'Group deleted successfully !';
 	} catch (err) {

@@ -1,6 +1,7 @@
 const sendMessage = require('../mutations/message/send-message');
 const getLatestMessages = require('../queries/message/get-latest-messages');
 const getMessages = require('../queries/message/get-messages');
+const deleteContact = require('../subscriptions/group/delete-contact');
 const newMessage = require('../subscriptions/message/new-message');
 
 module.exports = {
@@ -12,6 +13,7 @@ module.exports = {
 		sendMessage : sendMessage
 	},
 	Subscription : {
-		newMessage : newMessage
+		newMessage    : newMessage,
+		deleteContact : deleteContact
 	}
 };

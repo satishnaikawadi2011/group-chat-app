@@ -18,7 +18,5 @@ const GroupSchema = new Schema(
 	{ timestamps: true }
 );
 
-GroupSchema.plugin(require('mongoose-autopopulate'));
-
 const Group = mongoose.model('group', GroupSchema);
 module.exports = Group;

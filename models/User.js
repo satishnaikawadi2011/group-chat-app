@@ -33,6 +33,5 @@ const UserSchema = new Schema(
 	},
 	{ timestamps: true }
 );
-UserSchema.plugin(require('mongoose-autopopulate'));
 const User = mongoose.model('user', UserSchema);
 module.exports = User;

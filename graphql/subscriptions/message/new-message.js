@@ -5,7 +5,6 @@ const checkAuth = require('../../../utils/check-auth');
 module.exports = {
 	subscribe : withFilter(
 		(_, __, context) => {
-			// console.log('In sub');
 			const { pubsub } = context;
 			const user = checkAuth(context);
 			if (!user) {

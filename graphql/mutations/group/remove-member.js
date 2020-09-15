@@ -47,6 +47,9 @@ module.exports = async (_, { userId, groupName }, context) => {
 			type    : 'group',
 			content : `Admin has removed ${otherUser.username} from group.`
 		});
+		pubsub.publish('DELETE_CONTACT', {
+			deleteContact: { username: otherUser.username, name: group.name, type: 'personal' }
+		});
 		pubsub.publish('NEW_MESSAGE', { newMessage: message });
 		const members = await User.find({ username: { $in: group.members.map((m) => m.username) } });
 		return members.map((m) => {

@@ -5,6 +5,7 @@ const Message = require('../../../models/Message');
 
 module.exports = async (_, { id: userID }, context) => {
 	try {
+		const { pubsub } = context;
 		const { id, username } = checkAuth(context);
 		const errors = {};
 		if (userID.trim() == '') {
@@ -40,6 +41,9 @@ module.exports = async (_, { id: userID }, context) => {
 					username
 				]
 			}
+		});
+		pubsub.publish('DELETE_CONTACT', {
+			deleteContact : { username: otherUser.username, name: username, type: 'personal' }
 		});
 		await otherUser.save();
 		await user.save();
