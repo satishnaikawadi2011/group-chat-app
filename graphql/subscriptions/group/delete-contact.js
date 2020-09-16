@@ -15,7 +15,8 @@ module.exports = {
 		},
 		async ({ deleteContact }, _, context) => {
 			const { username } = checkAuth(context);
-			if (deleteContact.type === 'personal' || 'personal2') {
+			// console.log(deleteContact);
+			if (deleteContact.type === 'personal' || deleteContact.type === 'personal2') {
 				if (deleteContact.username === username) {
 					return true;
 				}
@@ -23,6 +24,7 @@ module.exports = {
 			}
 			else {
 				const members = deleteContact.members.map((m) => m.username);
+				// console.log(members);
 				if (members.includes(username)) {
 					return true;
 				}
