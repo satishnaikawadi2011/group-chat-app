@@ -54,7 +54,7 @@ module.exports = gql`
 		createGroup(name: String!): Group!
 		deleteGroup(id: String!): String!
 		addMember(userId: String!, groupName: String!): [User]!
-		removeMember(userId: String!, groupName: String!): [User]!
+		removeMember(otherUsername: String!, groupName: String!): String!
 		leftGroup(groupName: String!): String!
 	}
 

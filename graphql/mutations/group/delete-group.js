@@ -32,7 +32,7 @@ module.exports = async (_, { id: groupId }, context) => {
 
 		await Message.deleteMany({ type: 'group', to: group.name });
 		pubsub.publish('DELETE_CONTACT', {
-			deleteContact: { username: otherUser.username, name: group.name, type: 'group', members: group.members }
+			deleteContact : { name: group.name, type: 'group', members: group.members }
 		});
 		await group.delete();
 		return 'Group deleted successfully !';

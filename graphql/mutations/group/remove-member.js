@@ -5,15 +5,15 @@ const User = require('../../../models/User');
 const Message = require('../../../models/Message');
 const mongoose = require('mongoose');
 
-module.exports = async (_, { userId, groupName }, context) => {
+module.exports = async (_, { otherUsername, groupName }, context) => {
 	try {
 		const { id, username } = checkAuth(context);
 		const { pubsub } = context;
 		const errors = {};
 		const group = await Group.findOne({ name: groupName });
-		const otherUser = await User.findOne({ _id: userId });
+		const otherUser = await User.findOne({ username: otherUsername });
 		if (!otherUser) {
-			errors.userId = 'User with this this userId not found !';
+			errors.username = 'User with this this userId not found !';
 			throw errors;
 		}
 		if (!group) {
@@ -25,15 +25,15 @@ module.exports = async (_, { userId, groupName }, context) => {
 		}
 		const isMember = group.members.find((member) => member.username == otherUser.username);
 		if (!isMember) {
-			errors.userId = 'This user is not a member of this group !';
+			errors.username = 'This user is not a member of this group !';
 			throw errors;
 		}
-		if (userId.trim() == '') {
-			errors.userId = 'Unique userId of user must be provided to add them to your group !';
+		if (otherUsername.trim() == '') {
+			errors.username = 'Unique userId of user must be provided to add them to your group !';
 			throw errors;
 		}
-		else if (id == userId) {
-			errors.userId = " You are a admin of group , so don't remove yourself !";
+		else if (username === otherUsername) {
+			errors.username = " You are a admin of group , so don't remove yourself !";
 			throw errors;
 		}
 		const filteredGroups = otherUser.groups.filter((gname) => gname != group.name);
@@ -52,12 +52,13 @@ module.exports = async (_, { userId, groupName }, context) => {
 		});
 		pubsub.publish('NEW_MESSAGE', { newMessage: message });
 		const members = await User.find({ username: { $in: group.members.map((m) => m.username) } });
-		return members.map((m) => {
-			return {
-				id : m._id,
-				...m._doc
-			};
-		});
+		// return members.map((m) => {
+		// 	return {
+		// 		id : m._id,
+		// 		...m._doc
+		// 	};
+		// });
+		return otherUser.username;
 	} catch (err) {
 		console.log(err);
 		if (err.kind == 'ObjectId') {
