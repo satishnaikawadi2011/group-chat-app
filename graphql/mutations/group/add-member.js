@@ -39,13 +39,14 @@ module.exports = async (_, { userId, groupName }, context) => {
 			...otherUser.groups
 		];
 		await otherUser.save();
-		group.members = [
+		const membersToBeReturned = [
 			...group.members,
 			{
 				username  : otherUser.username,
 				createdAt : new Date().toISOString()
 			}
 		];
+		group.members = membersToBeReturned;
 		await group.save();
 		const message = await Message.create({
 			from    : 'server',
@@ -54,16 +55,10 @@ module.exports = async (_, { userId, groupName }, context) => {
 			content : `Admin has added ${otherUser.username} to group.`
 		});
 		pubsub.publish('NEW_CONTACT', {
-			newContact: { username: otherUser.username, contactName: group.name, type: 'group' }
+			newContact : { username: otherUser.username, contactName: group.name, type: 'group' }
 		});
 		pubsub.publish('NEW_MESSAGE', { newMessage: message });
-		const members = await User.find({ username: { $in: group.members.map((m) => m.username) } });
-		return members.map((m) => {
-			return {
-				id : m._id,
-				...m._doc
-			};
-		});
+		return membersToBeReturned;
 	} catch (err) {
 		console.log(err);
 		if (err.kind == 'ObjectId') {
