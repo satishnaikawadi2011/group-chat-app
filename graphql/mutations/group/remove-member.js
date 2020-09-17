@@ -4,6 +4,8 @@ const { UserInputError } = require('apollo-server');
 const User = require('../../../models/User');
 const Message = require('../../../models/Message');
 const mongoose = require('mongoose');
+const Notification = require('../../../models/Notification');
+const { REMOVED, NEW_NOTIFICATION } = require('../../../utils/eventTypes');
 
 module.exports = async (_, { otherUsername, groupName }, context) => {
 	try {
@@ -47,17 +49,17 @@ module.exports = async (_, { otherUsername, groupName }, context) => {
 			type    : 'group',
 			content : `Admin has removed ${otherUser.username} from group.`
 		});
+		const notification = await Notification.create({
+			sender    : username,
+			recepient : otherUser.username,
+			type      : REMOVED,
+			content   : `${username} has removed you from group ${group.name}.`
+		});
+		pubsub.publish(NEW_NOTIFICATION, { newNotification: { ...notification._doc, id: notification._id } });
 		pubsub.publish('DELETE_CONTACT', {
 			deleteContact : { username: otherUser.username, name: group.name, type: 'personal2' }
 		});
 		pubsub.publish('NEW_MESSAGE', { newMessage: message });
-		const members = await User.find({ username: { $in: group.members.map((m) => m.username) } });
-		// return members.map((m) => {
-		// 	return {
-		// 		id : m._id,
-		// 		...m._doc
-		// 	};
-		// });
 		return otherUser.username;
 	} catch (err) {
 		console.log(err);

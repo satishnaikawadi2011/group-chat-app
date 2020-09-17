@@ -1,6 +1,7 @@
 const userResolver = require('./user');
 const messageResolver = require('./message');
 const groupResolvers = require('./group');
+const notificationResolver = require('./notification');
 const User = require('../../models/User');
 const Message = require('../../models/Message');
 const Group = require('../../models/Group');
@@ -55,16 +56,19 @@ module.exports = {
 	Query        : {
 		...userResolver.Query,
 		...messageResolver.Query,
-		...groupResolvers.Query
+		...groupResolvers.Query,
+		...notificationResolver.Query
 	},
 	Mutation     : {
 		...userResolver.Mutation,
 		...messageResolver.Mutation,
-		...groupResolvers.Mutation
+		...groupResolvers.Mutation,
+		...notificationResolver.Mutation
 	},
 	Subscription : {
 		...messageResolver.Subscription,
-		...groupResolvers.Subscription
+		...groupResolvers.Subscription,
+		...notificationResolver.Subscription
 	},
 	JSON         : GraphQLJSON
 };

@@ -2,28 +2,30 @@ const checkAuth = require('../../../utils/check-auth');
 const { UserInputError } = require('apollo-server');
 const User = require('../../../models/User');
 const Message = require('../../../models/Message');
+const { ADDED, NEW_NOTIFICATION } = require('../../../utils/eventTypes');
+const Notification = require('../../../models/Notification');
 
-module.exports = async (_, { id: userID }, context) => {
+module.exports = async (_, { username: otherUsername }, context) => {
 	try {
 		const { pubsub } = context;
 		const { id, username } = checkAuth(context);
 		const errors = {};
-		if (userID.trim() == '') {
-			errors.userId = 'Unique userId of user must be provided to delete them from your contact !';
+		if (otherUsername.trim() == '') {
+			errors.username = 'Unique username of user must be provided to delete them from your contact !';
 			throw errors;
 		}
-		else if (id == userID) {
-			errors.userId = 'You cannot delete yourself from your contacts !';
+		else if (username == otherUsername) {
+			errors.username = 'You cannot delete yourself from your contacts !';
 			throw errors;
 		}
-		const otherUser = await User.findOne({ _id: userID });
+		const otherUser = await User.findOne({ username: otherUsername });
 		if (!otherUser) {
-			errors.userId = 'User with this this userId not found !';
+			errors.username = 'User with this this username not found !';
 			throw errors;
 		}
 		const user = await User.findOne({ username });
 		if (!user.contacts.find((u) => u == otherUser.username)) {
-			errors.userId = 'This user is not present in your contacts !';
+			errors.username = 'This user is not present in your contacts !';
 			throw errors;
 		}
 		user.contacts = user.contacts.filter((u) => u != otherUser.username);
@@ -42,16 +44,21 @@ module.exports = async (_, { id: userID }, context) => {
 				]
 			}
 		});
+		const notification = await Notification.create({
+			sender    : username,
+			recepient : otherUser.username,
+			type      : ADDED,
+			content   : `${username} has removed you from their contacts.`
+		});
+		pubsub.publish(NEW_NOTIFICATION, { newNotification: { ...notification._doc, id: notification._id } });
 		pubsub.publish('DELETE_CONTACT', {
 			deleteContact : { username: otherUser.username, name: username, type: 'personal' }
 		});
 		await otherUser.save();
 		await user.save();
-		return [
-			...user.contacts
-		];
+		return otherUsername;
 	} catch (err) {
-		// console.log(Object.keys(err));
+		console.log(err);
 		if (err.kind == 'ObjectId') {
 			throw new UserInputError('Bad Input !', { errors: { userId: 'Please provide a valid userId !' } });
 		}

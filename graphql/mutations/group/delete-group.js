@@ -3,6 +3,8 @@ const Group = require('../../../models/Group');
 const { UserInputError } = require('apollo-server');
 const User = require('../../../models/User');
 const Message = require('../../../models/Message');
+const Notification = require('../../../models/Notification');
+const { NEW_NOTIFICATION, DELETED } = require('../../../utils/eventTypes');
 
 module.exports = async (_, { id: groupId }, context) => {
 	try {
@@ -29,7 +31,15 @@ module.exports = async (_, { id: groupId }, context) => {
 			m.groups = m.groups.filter((gname) => gname != group.name);
 			m.save();
 		});
-
+		members.forEach(async (m) => {
+			const notification = await Notification.create({
+				sender    : username,
+				recepient : m.username,
+				type      : DELETED,
+				content   : `${username} has deleted the group with name ${group.name}.`
+			});
+			pubsub.publish(NEW_NOTIFICATION, { newNotification: { ...notification._doc, id: notification._id } });
+		});
 		await Message.deleteMany({ type: 'group', to: group.name });
 		pubsub.publish('DELETE_CONTACT', {
 			deleteContact : { name: group.name, type: 'group', members: group.members }

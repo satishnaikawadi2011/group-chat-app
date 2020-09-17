@@ -3,6 +3,8 @@ const Group = require('../../../models/Group');
 const { UserInputError } = require('apollo-server');
 const User = require('../../../models/User');
 const Message = require('../../../models/Message');
+const Notification = require('../../../models/Notification');
+const { ADDED, NEW_NOTIFICATION } = require('../../../utils/eventTypes');
 
 module.exports = async (_, { userId, groupName }, context) => {
 	try {
@@ -54,6 +56,13 @@ module.exports = async (_, { userId, groupName }, context) => {
 			type    : 'group',
 			content : `Admin has added ${otherUser.username} to group.`
 		});
+		const notification = await Notification.create({
+			sender    : username,
+			recepient : otherUser.username,
+			type      : ADDED,
+			content   : `${username} has addded you to group ${group.name}.`
+		});
+		pubsub.publish(NEW_NOTIFICATION, { newNotification: { ...notification._doc, id: notification._id } });
 		pubsub.publish('NEW_CONTACT', {
 			newContact : { username: otherUser.username, contactName: group.name, type: 'group' }
 		});

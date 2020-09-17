@@ -14,6 +14,16 @@ module.exports = gql`
 		contacts: [String]!
 	}
 
+	type Notification {
+		id: String!
+		type: String!
+		sender: String!
+		recepient: String!
+		createdAt: String!
+		read: String!
+		content: String!
+	}
+
 	type Message {
 		id: ID!
 		from: String!
@@ -44,23 +54,26 @@ module.exports = gql`
 		getMessages(otherUser: String!, type: String!): [Message]!
 		getLatestMessages: JSON
 		getGroup(name: String!): Group!
+		getNotifications: [Notification]!
 	}
 
 	type Mutation {
 		signup(email: String!, password: String!, confirmPassword: String!, username: String!): User!
 		addContact(id: String!): [String]!
-		removeContact(id: String!): [String]!
+		removeContact(username: String!): String!
 		sendMessage(to: String!, content: String!): Message!
 		createGroup(name: String!): Group!
 		deleteGroup(id: String!): String!
 		addMember(userId: String!, groupName: String!): [User]!
 		removeMember(otherUsername: String!, groupName: String!): String!
 		leftGroup(groupName: String!): String!
+		markNotificationsAsRead(ids: [String]!): [String]!
 	}
 
 	type Subscription {
 		newMessage: Message!
 		newContact: JSON
 		deleteContact: JSON
+		newNotification: Notification!
 	}
 `;
