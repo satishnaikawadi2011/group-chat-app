@@ -20,7 +20,7 @@ module.exports = gql`
 		sender: String!
 		recepient: String!
 		createdAt: String!
-		read: String!
+		read: Boolean!
 		content: String!
 	}
 

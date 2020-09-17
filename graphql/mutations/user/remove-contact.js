@@ -2,7 +2,7 @@ const checkAuth = require('../../../utils/check-auth');
 const { UserInputError } = require('apollo-server');
 const User = require('../../../models/User');
 const Message = require('../../../models/Message');
-const { ADDED, NEW_NOTIFICATION } = require('../../../utils/eventTypes');
+const { ADDED, NEW_NOTIFICATION, REMOVED } = require('../../../utils/eventTypes');
 const Notification = require('../../../models/Notification');
 
 module.exports = async (_, { username: otherUsername }, context) => {
@@ -47,7 +47,7 @@ module.exports = async (_, { username: otherUsername }, context) => {
 		const notification = await Notification.create({
 			sender    : username,
 			recepient : otherUser.username,
-			type      : ADDED,
+			type      : REMOVED,
 			content   : `${username} has removed you from their contacts.`
 		});
 		pubsub.publish(NEW_NOTIFICATION, { newNotification: { ...notification._doc, id: notification._id } });

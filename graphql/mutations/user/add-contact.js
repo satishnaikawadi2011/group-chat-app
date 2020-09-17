@@ -3,7 +3,7 @@ const { UserInputError } = require('apollo-server');
 const User = require('../../../models/User');
 const Message = require('../../../models/Message');
 const Notification = require('../../../models/Notification');
-const { REMOVED, NEW_NOTIFICATION } = require('../../../utils/eventTypes');
+const { REMOVED, NEW_NOTIFICATION, ADDED } = require('../../../utils/eventTypes');
 
 module.exports = async (_, { id: userID }, context) => {
 	try {
@@ -41,7 +41,7 @@ module.exports = async (_, { id: userID }, context) => {
 		const notification = await Notification.create({
 			sender    : username,
 			recepient : otherUser.username,
-			type      : REMOVED,
+			type      : ADDED,
 			content   : `${username} has added you to their contacts.`
 		});
 		pubsub.publish(NEW_NOTIFICATION, { newNotification: { ...notification._doc, id: notification._id } });

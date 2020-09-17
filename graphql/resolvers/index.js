@@ -42,6 +42,9 @@ const userInGroup = async (parent) => {
 };
 
 module.exports = {
+	Notification : {
+		createdAt : (parent) => parent.createdAt.toISOString()
+	},
 	User         : {
 		createdAt : (parent) => parent.createdAt.toISOString(),
 		groups    : getGroupsInUser
